@@ -1,0 +1,39 @@
+name: Mirror GitLab -> GitHub
+
+# GitLab CI no hace push a GitHub: solo dispara este evento. Así evitamos bucles,
+# porque los push hechos con GITHUB_TOKEN no activan otros workflows.
+on:
+  repository_dispatch:
+    types: [mirror-from-gitlab]
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pull-mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout minimo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Traer mirror de GitLab y empujar a GitHub
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_REPO: ${{ vars.GITLAB_REPO }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GITLAB_TOKEN:-}" ] || [ -z "${GITLAB_REPO:-}" ]; then
+            echo "Faltan el secret GITLAB_TOKEN o la variable GITLAB_REPO" >&2
+            exit 1
+          fi
+          tmp="$(mktemp -d)"
+          git clone --quiet --mirror "https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_REPO}.git" "$tmp/repo.git"
+          git -C "$tmp/repo.git" push --quiet --mirror "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git"
+          echo "Mirror GitLab -> GitHub completado"

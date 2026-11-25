@@ -1,0 +1,15 @@
+# Claves generadas localmente: NUNCA subirlas
+keys/
+*.pub
+
+# Artefactos de release
+dist/
+
+# Python / editores
+__pycache__/
+*.pyc
+.venv/
+.vscode/
+.idea/
+*.swp
+.DS_Store
