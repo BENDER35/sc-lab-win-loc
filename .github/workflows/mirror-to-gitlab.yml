@@ -30,7 +30,7 @@ jobs:
           fi
           git config --global user.email "mirror@local"
           git config --global user.name "Mirror Bot"
-          git fetch --quiet --prune origin '+refs/heads/*:refs/heads/*' '+refs/tags/*:refs/tags/*'
+          git fetch --quiet --prune origin '+refs/heads/*:refs/remotes/mirror/*' '+refs/tags/*:refs/tags/*'
           url="https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_REPO}.git"
-          git push --quiet "$url" 'refs/heads/*:refs/heads/*' 'refs/tags/*:refs/tags/*' --prune
+          git push --quiet "$url" 'refs/remotes/mirror/*:refs/heads/*' 'refs/tags/*:refs/tags/*' --prune
           echo "Mirror GitHub -> GitLab completado"
